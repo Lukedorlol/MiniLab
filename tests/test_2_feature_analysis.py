@@ -57,7 +57,7 @@ def test_single_feature_ranking():
     ]
     assert len(cat_features) >= 2, "At least two categorical (_num) features expected"
 
-    #print(f"✅ Single feature ranking valid ({len(ranking)} features, top: {ranking[0][0]})")
+    print(f"✅ Single feature ranking valid ({len(ranking)} features, top: {ranking[0]})")
 
 
 # ---------------------------------------------------------------------

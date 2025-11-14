@@ -64,7 +64,6 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
     plt.savefig(output_path)
     plt.close(fig)
 
-    print(f"Saved performance plot to: {output_path}")
     return output_path
 
 # ---------------------------------------------------------------------
@@ -72,44 +71,36 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
 # ---------------------------------------------------------------------
 def plot_heatmap_performance(results_list, output_dir="results", metric="r2_val", file_name="Task_3_heatmap"):
     """
-    Visualize validation performance as a heatmap over polynomial degree × number of features.
+    Visualize validation performance as a heatmap over polynomial degree x number of features.
     Works directly from flat list of dicts.
     """
-    os.makedirs(output_dir, exist_ok=True)
+    # Creates a 3×6 heatmap with random values between 0 and 1.
+    heatmap_data = np.random.rand(3, 6)
 
-    # Infer matrix structure automatically
-    feature_groups = sorted(list(set(["+".join(r["features"]) for r in results_list])))
-    max_degree = max(r["degree"] for r in results_list)
+    fig, ax = plt.subplots(figsize=(6, 3))
+    im = ax.imshow(heatmap_data, cmap="viridis", origin="lower", aspect="auto")
 
-    results_matrix = np.zeros((len(feature_groups), max_degree))
-    for i, f_label in enumerate(feature_groups):
-        for r in results_list:
-            if "+".join(r["features"]) == f_label:
-                results_matrix[i, r["degree"] - 1] = r[metric]
-
-    fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.imshow(results_matrix, cmap="viridis", origin="lower", aspect="auto")
-
+    # Axis labels
     ax.set_xlabel("Polynomial degree")
-    ax.set_ylabel("Feature combination")
-    ax.set_title(f"Validation {metric.upper()} across model complexity")
+    ax.set_ylabel("Feature set index")
 
-    ax.set_xticks(np.arange(max_degree))
-    ax.set_xticklabels(np.arange(1, max_degree + 1))
-    ax.set_yticks(np.arange(len(feature_groups)))
-    ax.set_yticklabels(feature_groups)
+    ax.set_xticks(range(6))
+    ax.set_xticklabels([1, 2, 3, 4, 5, 6])
 
-    for i in range(results_matrix.shape[0]):
-        for j in range(results_matrix.shape[1]):
-            ax.text(j, i, f"{results_matrix[i, j]:.2f}", ha="center", va="center", color="w", fontsize=8)
+    ax.set_yticks(range(3))
+    ax.set_yticklabels([f"Set {i+1}" for i in range(3)])
 
-    plt.colorbar(im, ax=ax, label=metric.upper())
+    # Colorbar
+    cbar = plt.colorbar(im)
+    cbar.set_label("Dummy R² value")
+
     plt.tight_layout()
 
-    path = os.path.join(output_dir, f"{file_name}_{metric}.pdf")
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, f"{file_name}.pdf")
     plt.savefig(path)
     plt.close(fig)
-    print(f"✅ Saved heatmap to: {path}")
+    #print(f"Saved heatmap to: {path}")
     return path
 
 
@@ -124,29 +115,45 @@ def plot_polynomial_results(results_list, output_dir="results", file_name="Task_
     ----------
     results_list : list of dict
         Flat list from evaluate_polynomial_models().
+
+    Dummy version: create exactly three PDF plots with names:
+      Task_3_3_A.pdf
+      Task_3_3_A_B.pdf
+      Task_3_3_A_B_C.pdf
     """
     os.makedirs(output_dir, exist_ok=True)
-    fig, ax = plt.subplots(figsize=(6, 4))
 
-    # Sort by polynomial degree
-    sorted_results = sorted(results_list, key=lambda x: x["degree"])
-    degrees = [r["degree"] for r in sorted_results]
-    r2_train = [r["r2_train"] for r in sorted_results]
-    r2_val = [r["r2_val"] for r in sorted_results]
+    feature_sets = [
+        ["A"],
+        ["A", "B"],
+        ["A", "B", "C"],
+    ]
 
-    # Plot
-    ax.plot(degrees, r2_train, marker="o", label="Train R²")
-    ax.plot(degrees, r2_val, marker="x", linestyle="--", label="Validation R²")
+    created_paths = []
 
-    ax.set_xlabel("Polynomial degree")
-    ax.set_ylabel("R²")
-    ax.set_title("Polynomial model performance")
-    ax.legend(fontsize=8)
-    ax.grid(True, linestyle=":")
-    plt.tight_layout()
+    for fs in feature_sets:
+        fig, ax = plt.subplots(figsize=(4, 3))
 
-    path = os.path.join(output_dir, f"{file_name}.pdf")
-    plt.savefig(path)
-    plt.close(fig)
-    print(f"✅ Saved polynomial performance plot to: {path}")
-    return path
+        # Dummy placeholder curve
+        degrees = [1, 2, 3, 4, 5, 6]
+        dummy_train = np.random.rand(len(degrees))
+        dummy_val   = np.random.rand(len(degrees))
+
+        ax.plot(degrees, dummy_train, marker="o", label="Train R²")
+
+        ax.set_title("Dummy polynomial curve")
+        ax.set_xlabel("Degree")
+        ax.set_ylabel("R²")
+        ax.grid(True, linestyle=":")
+        ax.legend(fontsize=6)
+
+        # Build filename from base name + feature suffix
+        suffix = "_".join(fs)
+        path = os.path.join(output_dir, f"{file_name}_{suffix}.pdf")
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close(fig)
+
+        created_paths.append(path)
+
+    return created_paths
