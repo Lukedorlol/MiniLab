@@ -24,9 +24,24 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
     """
     df_encoded = df.copy()
 
-    # Example categorical feature: 'condition' → encode via string length
-    if "condition" in df_encoded.columns:
-        df_encoded["condition_num"] = df_encoded["condition"].astype(str).str.len()
+    # Example categorical feature: 'condition'
+    condition_mapping = {
+        "well_kept": 0,            
+        "modernized": 1,         
+        "fully_renovated": 2,     
+        "first_time_use_after_refurbishment": 4,
+        "refurbished": 3,
+        "first_time_use": 6,       
+        "mint_condition": 5       
+    }
+
+    df_encoded["condition_num"] = df_encoded["condition"].map(condition_mapping)
+    df_encoded["condition_num"] = df_encoded["condition_num"].fillna(5)
+    print("Distribution:")
+    print(df_encoded['condition_num'].value_counts(dropna=False))
+
+
+    # Example categorical feature: 'condition'
 
     # Boolean → 0/1
     bool_cols = df_encoded.select_dtypes(include=["bool"]).columns
@@ -83,11 +98,16 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         except Exception:
             df_clean[col] = df_clean[col].fillna("unknown")
 
+
+
     # Encode categorical columns
     df_clean = encode_categorical(df_clean)
 
     # Keep only numeric columns
     df_clean = df_clean.select_dtypes(include=[np.number])
+    #Remove Columns with to many NaNs
+    print("Removing columns with to many NaNs")
+    df_clean.drop(['telekomHybridUploadSpeed', 'heatingCosts', 'electricityBasePrice', 'electricityKwhPrice'], axis = 1, inplace = True)
 
     # Final safety check
     df_clean = df_clean.dropna(axis=0, how="any")
