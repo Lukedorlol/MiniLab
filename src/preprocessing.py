@@ -47,25 +47,38 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Perform complete cleaning pipeline:
-    - Remove invalid rows (e.g., livingSpace <= 10)
+    - Remove invalid rows (e.g., livingSpace <= 10 && > 1000)
     - Fill missing values (median for numeric, mode for categorical)
     - Encode categorical features
     - Keep only numeric columns
     """
+    
 
     df_clean = df.copy()
+    print("Dataframe before cleaning: ", df_clean.shape)
+    #print(df_clean.describe())
+    print("Cleaning Data....")
 
     # Filter invalid rows
     if "livingSpace" in df_clean.columns:
-        df_clean = df_clean[df_clean["livingSpace"] > 10]
+        df_clean = df_clean[(df_clean["livingSpace"] > 10) & (df_clean['livingSpace'] < 1000)]
+    print("Only regarding livingSpace > 10 m² & < 1000m² Shape: ", df_clean.shape)
+    
+    # Fill serviceCharge with Median
+    print("Missing Values serviceCharge", df_clean['serviceCharge'].isnull().sum())
+    df_clean['serviceCharge'] = df['serviceCharge'].fillna(df_clean['serviceCharge'].median())
+    print("Missing values serviceCharge after filling:", df_clean['serviceCharge'].isnull().sum())
 
-    # Fill numeric columns (median)
+    # Fill totalRent by baseRent + serviceCharge
+    df_clean['totalRent'] = df['totalRent'].fillna(df_clean["baseRent"]+ df_clean["serviceCharge"])    
+
     for col in df_clean.select_dtypes(include=[np.number]).columns:
         df_clean[col] = df_clean[col].fillna(df_clean[col].median())
 
     # Fill non-numeric columns (mode)
     for col in df_clean.select_dtypes(exclude=[np.number]).columns:
         try:
+
             df_clean[col] = df_clean[col].fillna(df_clean[col].mode()[0])
         except Exception:
             df_clean[col] = df_clean[col].fillna("unknown")
@@ -78,7 +91,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Final safety check
     df_clean = df_clean.dropna(axis=0, how="any")
-
+    print("Dataframe nach dem Cleanen: ", df_clean.shape)
     return df_clean
 
 # ---------------------------------------------------------------------
