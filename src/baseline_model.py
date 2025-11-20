@@ -55,7 +55,7 @@ def train_baseline_model(X_train, y_train):
     Students will later replace this with their own implementation
     using the normal equation.
     """
-    model = LinearRegression()
+    model = BaselineLinearModel()
     model.fit(X_train, y_train)
     return model
 
