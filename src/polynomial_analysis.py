@@ -1,5 +1,5 @@
 """
-Polynomial Modeling and Model Selection (reference implementation for Task 3.1)
+Polynomial Modeling and Model Selection (reference implementation for task 3)
 
 Dummy version - contains only hardcoded values: returns fixed example data 
 structures in the correct format so that tests and example notebooks can 
@@ -8,26 +8,27 @@ run successfully.
 
 def get_candidate_features():
     """
-    Return a fixed list of Top K features (obtained from earlier tasks)
+    Return a fixed list of Top 3 features (obtained from earlier tasks)
     """
     return [
         "livingSpace",
         "yearConstructed",
         "noParkSpaces",
-        "picturecount",
-        "noRooms",
     ]
 
 
 def build_polynomial_design_matrix(X_full, n_features, degree):
     """
-    Given the cleaned dataframe, a feature list, and a polynomial degree:
-    - extracts X_train / X_val
-    - expands them into polynomial features
-    Returns (X_train_poly, X_val_poly, y_train, y_val)
+    Given is an array of ordered features as a numpy array, 
+    a feature list, and a polynomial degree:
+    Goal is to return the design matrix:
+    - extract the first n_features (gives the number of features)
+    - expands them into polynomial features (of degree degree)
+    Returns X_poly
+    The method can be called for X_train or X_val or X_test.
     """
 
-    # extract degree columns
+    # Extract the first n_features columns
     X_poly = X_full[:, :n_features]
 
     # ToDo: This only selects the columns, but is not setting up the design matrix
@@ -49,7 +50,8 @@ def evaluate_polynomial_models(X_train=None, y_train=None, X_val=None, y_val=Non
     y_train, y_val : np.ndarray
         Target variables.
     feature_names : list of str
-        Names of the features used.
+        Names of the features used. T
+        This is required to name the used features in the list.
     max_degree : int
         Maximum polynomial degree to evaluate.
 

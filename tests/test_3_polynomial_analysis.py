@@ -56,17 +56,17 @@ def load_clean_data():
     y_val = df_val_clean["totalRent"].to_numpy()
 
     #print(f"Loaded and cleaned data: {len(X_train)} train, {len(X_val)} val samples")
-    return X_train, y_train, X_val, y_val
+    return X_train, y_train, X_val, y_val, selected_features
 
 # ---------------------------------------------------------------------
 # 3.1 Test — Structure and plausibility of polynomial model results
 # ---------------------------------------------------------------------
 def test_polynomial_results_structure():
     """Check that polynomial model summary results are valid."""
-    X_train, y_train, X_val, y_val = load_clean_data()
+    X_train, y_train, X_val, y_val, selected_features = load_clean_data()
 
     # Raw polynomial evaluations
-    poly_results = evaluate_polynomial_models(X_train, y_train, X_val, y_val)
+    poly_results = evaluate_polynomial_models(X_train, y_train, X_val, y_val, feature_names=selected_features)
     assert isinstance(poly_results, list)
     assert len(poly_results) > 0
 
@@ -112,8 +112,8 @@ def test_polynomial_results_structure():
 
 def test_visualization_output_heatmap():
     """Ensure both polynomial curve and heatmap plots are generated and saved as PDFs."""
-    X_train, y_train, X_val, y_val = load_clean_data()
-    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val)
+    X_train, y_train, X_val, y_val, selected_features = load_clean_data()
+    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val, feature_names=selected_features)
 
     output_dir = "results"
     os.makedirs(output_dir, exist_ok=True)
@@ -136,8 +136,8 @@ def test_visualization_output_heatmap():
 # ---------------------------------------------------------------------
 def test_visualization_output_2D():
     """Ensure both polynomial curve and heatmap plots are generated and saved as PDFs."""
-    X_train, y_train, X_val, y_val = load_clean_data()
-    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val)
+    X_train, y_train, X_val, y_val, selected_features = load_clean_data()
+    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val, feature_names=selected_features)
 
     output_dir = "results"
     os.makedirs(output_dir, exist_ok=True)
@@ -157,12 +157,10 @@ def test_visualization_output_2D():
 # ---------------------------------------------------------------------
 def test_best_polynomial_model_quality():
     """Ensure that best polynomial model reaches expected performance range."""
-    X_train, y_train, X_val, y_val = load_clean_data()
+    X_train, y_train, X_val, y_val, selected_features = load_clean_data()
 
-    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val)
+    results = evaluate_polynomial_models(X_train, y_train, X_val, y_val, feature_names=selected_features)
     best_model = get_best_polynomial_model(results)
-
-    df_train, y_train, df_val, y_val = load_clean_data()   # adapt if needed
 
     X_train_poly = build_polynomial_design_matrix(X_train, len(best_model["features"]), best_model["degree"])
     X_val_poly = build_polynomial_design_matrix(X_val, len(best_model["features"]), best_model["degree"])
