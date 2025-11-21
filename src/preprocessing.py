@@ -19,13 +19,14 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
     The transformation should be simple and deterministic.
 
     Example:
-    - 'condition' → string length
     - boolean features → {False: 0, True: 1}
     """
     df_encoded = df.copy()
 
-    # Example categorical feature: 'condition'
-    condition_mapping = {
+
+
+    # categorical feature: 'condition'
+    """ condition_mapping = {
         "well_kept": 0,            
         "modernized": 1,         
         "fully_renovated": 2,     
@@ -35,12 +36,11 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
         "mint_condition": 5,       
         "unknown": 1
     }
-
     df_encoded["condition_num"] = df_encoded["condition"].map(condition_mapping)
     df_encoded["condition_num"] = df_encoded["condition_num"].fillna(3)
 
+     """
 
-    # Example categorical feature: 'condition'
 
     # Boolean → 0/1
     bool_cols = df_encoded.select_dtypes(include=["bool"]).columns
@@ -48,9 +48,16 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
         df_encoded[col + "_num"] = df_encoded[col].astype(int)
 
     # Optional: encode heatingType or interiorQual if present
-    for cat_col in ["heatingType", "interiorQual"]:
+    for cat_col in ["condition","heatingType","interiorQual","firingTypes","typeOfFlat","regio3"]:
         if cat_col in df_encoded.columns:
-            df_encoded[cat_col + "_num"] = df_encoded[cat_col].astype(str).str.len()
+            mean_prices = df_encoded.groupby(cat_col)["totalRent"].mean()
+            mean_prices_sorted = mean_prices.sort_values()
+            mapping = {kategorie: rang for rang, kategorie in enumerate(mean_prices_sorted.index)}
+            df_encoded[cat_col + "_num"] = df_encoded[cat_col].map(mapping)
+            median = int(len(mapping)/2)
+            df_encoded[cat_col + "_num"] = df_encoded[cat_col + "_num"].fillna(median)
+            
+            #df_encoded[cat_col + "_num"] = df_encoded[cat_col].astype(str).str.len()
 
     return df_encoded
 
@@ -77,7 +84,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     if "livingSpace" in df_clean.columns:
         df_clean = df_clean[(df_clean["livingSpace"] > 10) & (df_clean['livingSpace'] < 1000)]
     print("Only regarding livingSpace > 10 m² & < 1000m² Shape: ", df_clean.shape)
-    
+    if 'geo_plz' in df_clean.columns:
+        df_clean = df_clean[(df_clean['geo_plz'] < 48200)]
+    print("Removing PLZ that are not based in Münster")
     # Fill serviceCharge with Median
     print("Missing Values serviceCharge", df_clean['serviceCharge'].isnull().sum())
     df_clean['serviceCharge'] = df['serviceCharge'].fillna(df_clean['serviceCharge'].median())
