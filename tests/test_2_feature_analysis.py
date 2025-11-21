@@ -17,7 +17,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.feature_analysis import analyze_single_features, stepwise_selection
 from src.preprocessing import clean_data
-from src.baseline_model import evaluate_feature_set
 from src.visualization import plot_feature_performance
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_squared_error
@@ -57,7 +56,7 @@ def test_single_feature_ranking():
     ]
     assert len(cat_features) >= 2, "At least two categorical (_num) features expected"
 
-    #print(f"✅ Single feature ranking valid ({len(ranking)} features, top: {ranking[0][0]})")
+    print(f"✅ Single feature ranking valid ({len(ranking)} features, top: {ranking[0]})")
 
 
 # ---------------------------------------------------------------------
@@ -96,6 +95,8 @@ def test_stepwise_model_performance():
     # Find the 5-feature combination
     assert result[4] is not None, "No feature set with 5 features found"
     selected_features = result[4]["features"]
+    assert "totalRent" not in selected_features, "not allowed as a feature"
+    assert "baseRent" not in selected_features, "not allowed as a feature"
 
     # Prepare data
     X_train = df_train[selected_features]
