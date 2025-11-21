@@ -32,13 +32,12 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
         "first_time_use_after_refurbishment": 4,
         "refurbished": 3,
         "first_time_use": 6,       
-        "mint_condition": 5       
+        "mint_condition": 5,       
+        "unknown": 1
     }
 
     df_encoded["condition_num"] = df_encoded["condition"].map(condition_mapping)
-    df_encoded["condition_num"] = df_encoded["condition_num"].fillna(5)
-    print("Distribution:")
-    print(df_encoded['condition_num'].value_counts(dropna=False))
+    df_encoded["condition_num"] = df_encoded["condition_num"].fillna(3)
 
 
     # Example categorical feature: 'condition'
@@ -89,6 +88,8 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     for col in df_clean.select_dtypes(include=[np.number]).columns:
         df_clean[col] = df_clean[col].fillna(df_clean[col].median())
+    
+    df_clean['condition'] = df_clean['condition'].fillna("unknown")
 
     # Fill non-numeric columns (mode)
     for col in df_clean.select_dtypes(exclude=[np.number]).columns:
