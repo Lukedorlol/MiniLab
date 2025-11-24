@@ -41,7 +41,7 @@ def encode_categorical(df: pd.DataFrame) -> pd.DataFrame:
 
      """
 
-
+    print("Encoding categorical features...")
     # Boolean → 0/1
     bool_cols = df_encoded.select_dtypes(include=["bool"]).columns
     for col in bool_cols:
@@ -76,21 +76,15 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     
 
     df_clean = df.copy()
-    print("Dataframe before cleaning: ", df_clean.shape)
-    #print(df_clean.describe())
-    print("Cleaning Data....")
+    print(f"Shape: {df_clean.shape}Cleaning Data....")
 
     # Filter invalid rows
     if "livingSpace" in df_clean.columns:
         df_clean = df_clean[(df_clean["livingSpace"] > 10) & (df_clean['livingSpace'] < 1000)]
-    print("Only regarding livingSpace > 10 m² & < 1000m² Shape: ", df_clean.shape)
     if 'geo_plz' in df_clean.columns:
         df_clean = df_clean[(df_clean['geo_plz'] < 48200)]
-    print("Removing PLZ that are not based in Münster")
     # Fill serviceCharge with Median
-    print("Missing Values serviceCharge", df_clean['serviceCharge'].isnull().sum())
     df_clean['serviceCharge'] = df['serviceCharge'].fillna(df_clean['serviceCharge'].median())
-    print("Missing values serviceCharge after filling:", df_clean['serviceCharge'].isnull().sum())
 
     # Fill totalRent by baseRent + serviceCharge
     df_clean['totalRent'] = df['totalRent'].fillna(df_clean["baseRent"]+ df_clean["serviceCharge"])    
@@ -116,12 +110,11 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Keep only numeric columns
     df_clean = df_clean.select_dtypes(include=[np.number])
     #Remove Columns with to many NaNs
-    print("Removing columns with to many NaNs")
     df_clean.drop(['telekomHybridUploadSpeed', 'heatingCosts', 'electricityBasePrice', 'electricityKwhPrice'], axis = 1, inplace = True)
 
     # Final safety check
     df_clean = df_clean.dropna(axis=0, how="any")
-    print("Dataframe nach dem Cleanen: ", df_clean.shape)
+    print("Dataframe cleaned, Shape: ", df_clean.shape)
     return df_clean
 
 # ---------------------------------------------------------------------

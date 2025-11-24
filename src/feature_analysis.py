@@ -12,7 +12,10 @@ so that tests can be applied (but will fail).
 
 import pandas as pd
 import numpy as np
-
+from src.utils import feature_best_fit_list
+from src.baseline_model import train_baseline_model, evaluate_model
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, root_mean_squared_error
 # ---------------------------------------------------------------------
 # Single-feature analysis (Task 2.1)
 # ---------------------------------------------------------------------
@@ -39,16 +42,25 @@ def analyze_single_features(df: pd.DataFrame, target_col: str = "totalRent"):
         ]
         Sorted in descending order by R².
     """
-    # --- Dummy data for testing ---
-    features = [
-        "livingSpace", "numberOfRooms", "yearConstructed",
-        "baseRent", "floor", "heatingType_num",
-        "condition_num", "balcony", "cellar", "lift"
-    ]
-    np.random.seed(42)
-    r2_values = np.linspace(0.9, 0.1, len(features))  # strictly descending
+    print("Creating Dict of feature correlation to totalRent...")
+    results = []
 
-    return [{"feature": f, "r2": float(r)} for f, r in zip(features, r2_values)]
+    for col in df:
+        if col in ['totalRent','baseRent','serviceCharge','baseRentRange']: continue
+
+        df_tmp = df.dropna(subset=[col, "totalRent"])
+        X = df_tmp[[col]].to_numpy()
+        y = df_tmp['totalRent'].to_numpy()
+        model_full = LinearRegression().fit(X, y)
+        y_predict = model_full.predict(X)
+        r2_full = round(r2_score(y, y_predict),4)
+        rmse = root_mean_squared_error(y, y_predict)
+        #train_rmse = np.sqrt(root_mean_squared_error(y, y_predict))
+        results.append((col, r2_full,rmse))
+
+    results.sort(key=lambda x: x[1], reverse=True)
+    results_dict = [{"feature": f, "r2": r, 'rmse': m} for f,r,m in results]    
+    return results_dict
 
 
 # ---------------------------------------------------------------------
@@ -76,12 +88,31 @@ def stepwise_selection(df_train: pd.DataFrame, df_val: pd.DataFrame):
             ...
         ]
     """
-    # --- Dummy results for test verification ---
-    dummy_results = [
-        {"n_features": 1, "features": ["livingSpace"], "r2": 0.70, "rmse": 260.0},
-        {"n_features": 2, "features": ["livingSpace", "noRooms"], "r2": 0.78, "rmse": 210.0},
-        {"n_features": 3, "features": ["livingSpace", "noRooms", "floor"], "r2": 0.82, "rmse": 190.0},
-        {"n_features": 4, "features": ["livingSpace", "noRooms", "floor", "picturecount"], "r2": 0.85, "rmse": 180.0},
-        {"n_features": 5, "features": ["livingSpace", "noRooms", "floor", "picturecount", "noParkSpaces"], "r2": 0.87, "rmse": 175.0},
-    ]
-    return dummy_results
+    feature_list = analyze_single_features(df_train)
+    initial_feature = feature_list[0]
+    features_red_list = [initial_feature['feature']]
+    X_train_ = df_train[features_red_list].to_numpy()
+    y_train_ = df_train['totalRent'].to_numpy()
+    X_val_ = df_val[features_red_list].to_numpy()
+    y_val_ = df_val["totalRent"].to_numpy()
+    model_ = train_baseline_model(X_train_, y_train_)
+    eval_result_ = evaluate_model(model_, X_val_, y_val_)
+    r2_ = float(eval_result_["r2"])
+    rmse_ = float(eval_result_["rmse"])
+    features_used = [{"n_features": "1", "features": [initial_feature['feature']], "r2": initial_feature['r2'], 'rmse': initial_feature['rmse'], 'r2_val': r2_, 'rmse_val': rmse_}]
+    
+    for i in range (15):
+        new_feature_list = feature_best_fit_list(df_train, features_red_list, feature_list)
+        features_red_list.append(new_feature_list[0]['feature'])
+        X_train = df_train[features_red_list].to_numpy()
+        y_train = df_train['totalRent'].to_numpy()
+        X_val = df_val[features_red_list].to_numpy()
+        y_val = df_val["totalRent"].to_numpy()
+        model = train_baseline_model(X_train, y_train)
+        eval_result = evaluate_model(model, X_val, y_val)
+        r2 = float(eval_result["r2"])
+        rmse = float(eval_result["rmse"])
+        features_used.append({"n_features": i+2, "features": features_red_list.copy(), 'r2': new_feature_list[0]['r2'], 'rmse': new_feature_list[0]['rmse'], "r2_val": r2, 'rmse_val': rmse})
+    
+    print(features_used)    
+    return features_used
