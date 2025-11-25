@@ -133,7 +133,7 @@ def test_visualization_feature_performance():
     df_val = clean_data(pd.read_csv("data/validation.csv"))
 
     # Use the actual stepwise selection results from Task 2
-    stepwise_results = stepwise_selection(df_train, df_val)
+    stepwise_results = stepwise_selection(df_train, df_val, True)
 
     # Create visualization
     output_path = plot_feature_performance(

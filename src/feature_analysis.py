@@ -55,7 +55,6 @@ def analyze_single_features(df: pd.DataFrame, target_col: str = "totalRent"):
         y_predict = model_full.predict(X)
         r2_full = round(r2_score(y, y_predict),4)
         rmse = root_mean_squared_error(y, y_predict)
-        #train_rmse = np.sqrt(root_mean_squared_error(y, y_predict))
         results.append((col, r2_full,rmse))
 
     results.sort(key=lambda x: x[1], reverse=True)
@@ -66,7 +65,7 @@ def analyze_single_features(df: pd.DataFrame, target_col: str = "totalRent"):
 # ---------------------------------------------------------------------
 # Stepwise feature selection (Task 2.2)
 # ---------------------------------------------------------------------
-def stepwise_selection(df_train: pd.DataFrame, df_val: pd.DataFrame):
+def stepwise_selection(df_train: pd.DataFrame, df_val: pd.DataFrame, flag: bool=False):
     """
     Simulate a stepwise feature selection process that gradually adds features
     and evaluates the model performance.
@@ -97,22 +96,15 @@ def stepwise_selection(df_train: pd.DataFrame, df_val: pd.DataFrame):
     y_val_ = df_val["totalRent"].to_numpy()
     model_ = train_baseline_model(X_train_, y_train_)
     eval_result_ = evaluate_model(model_, X_val_, y_val_)
-    r2_ = float(eval_result_["r2"])
-    rmse_ = float(eval_result_["rmse"])
-    features_used = [{"n_features": "1", "features": [initial_feature['feature']], "r2": initial_feature['r2'], 'rmse': initial_feature['rmse'], 'r2_val': r2_, 'rmse_val': rmse_}]
+    features_used = [{"n_features": "1", "features": [initial_feature['feature']], "r2": eval_result_['r2'], 'rmse': eval_result_['rmse']}]
     
     for i in range (15):
-        new_feature_list = feature_best_fit_list(df_train, features_red_list, feature_list)
+        new_feature_list = feature_best_fit_list(df_train, df_val, features_red_list, feature_list)
+        if new_feature_list[0]['r2'] < features_used[-1]['r2'] and flag == False:
+            print(f"Neues Feature: {new_feature_list[0]['r2']} < aktuelle Feature: {features_used[-1]['r2']}")
+            break
         features_red_list.append(new_feature_list[0]['feature'])
-        X_train = df_train[features_red_list].to_numpy()
-        y_train = df_train['totalRent'].to_numpy()
-        X_val = df_val[features_red_list].to_numpy()
-        y_val = df_val["totalRent"].to_numpy()
-        model = train_baseline_model(X_train, y_train)
-        eval_result = evaluate_model(model, X_val, y_val)
-        r2 = float(eval_result["r2"])
-        rmse = float(eval_result["rmse"])
-        features_used.append({"n_features": i+2, "features": features_red_list.copy(), 'r2': new_feature_list[0]['r2'], 'rmse': new_feature_list[0]['rmse'], "r2_val": r2, 'rmse_val': rmse})
+        features_used.append({"n_features": i+2, "features": features_red_list.copy(), 'r2': new_feature_list[0]['r2'], 'rmse': new_feature_list[0]['rmse']})
     
     print(features_used)    
     return features_used

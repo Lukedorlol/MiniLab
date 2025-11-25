@@ -41,9 +41,7 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
 
     n_features = [r["n_features"] for r in results]
     r2_values = [r["r2"] for r in results]
-    r2_values_val = [r['r2_val'] for r in results]
     rmse_values = [r["rmse"] for r in results]
-    rmse_values_val = [r['rmse_val']for r in results]
 
     # --- Create figure ---
     fig, ax1 = plt.subplots(figsize=(6, 4))
@@ -54,17 +52,15 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
     ax1.set_xlabel("Number of features")
     ax1.set_ylabel("R² (val:green, train:blue)", color=color_r2)
     ax1.plot(n_features, r2_values, color_r2)
-    ax1.plot(n_features,r2_values_val, color = 'tab:green')
     ax1.tick_params(axis="y", labelcolor=color_r2)
     
 
     ax2 = ax1.twinx()
     ax2.set_ylabel("RMSE (€) (val:pink, train:red)", color=color_rmse)
     ax2.plot(n_features, rmse_values, color_rmse)
-    ax2.plot(n_features, rmse_values_val, color = 'tab:pink')
     ax2.tick_params(axis="y", labelcolor=color_rmse)
 
-    plt.title("Model performance (validation & training) vs. number of features")
+    plt.title("Model performance (validation) vs. number of features")
     fig.tight_layout()
 
     output_path = os.path.join(output_dir, f"{file_name}.pdf")
