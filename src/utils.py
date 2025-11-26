@@ -22,8 +22,13 @@ def feature_best_fit_list(df_clean, df_val, features_used, features_all):
         X_val = df_val[feature_cols_tmp].to_numpy()
         y_val = df_val['totalRent'].to_numpy()
         model = train_baseline_model(X_train, y_train)
-        eval_result = evaluate_model(model, X_val, y_val)
-        possible_features_dict.append({'feature': col_name['feature'], 'r2': eval_result['r2'], 'rmse': eval_result['rmse']}) 
+        train_result = evaluate_model(model, X_train, y_train)
+        val_result = evaluate_model(model, X_val, y_val)
+        possible_features_dict.append({'feature': col_name['feature'], 
+                                       'r2': val_result['r2'], 
+                                       'rmse': val_result['rmse'], 
+                                       'r2_train': train_result['r2'], 
+                                       'rmse_train': train_result['rmse']}) 
         
     
     possible_features_dict.sort(key=lambda x: x['r2'], reverse=True)
