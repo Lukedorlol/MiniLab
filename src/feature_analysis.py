@@ -59,7 +59,6 @@ def analyze_single_features(df: pd.DataFrame, target_col: str = "totalRent"):
 
     results.sort(key=lambda x: x[1], reverse=True)
     results_dict = [{"feature": f, "r2": r, 'rmse': m} for f,r,m in results]    
-    print(results_dict)
     return results_dict
 
 
@@ -102,6 +101,5 @@ def stepwise_selection(df_train: pd.DataFrame, df_val: pd.DataFrame, flag: bool=
             break
         features_red_list.append(new_feature_list[0]['feature'])
         features_used.append({"n_features": i+2, "features": features_red_list.copy(), 'r2': new_feature_list[0]['r2'], 'rmse': new_feature_list[0]['rmse'], 'r2_train': new_feature_list[0]['r2_train'], 'rmse_train': new_feature_list[0]['rmse_train']})
-    
-    print(features_used)    
+
     return features_used

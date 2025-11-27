@@ -5,6 +5,11 @@ Dummy version - contains only hardcoded values: returns fixed example data
 structures in the correct format so that tests and example notebooks can 
 run successfully.
 """
+import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, root_mean_squared_error
+from src.baseline_model import train_baseline_model, evaluate_model
 
 def get_candidate_features():
     """
@@ -12,8 +17,8 @@ def get_candidate_features():
     """
     return [
         "livingSpace",
-        "yearConstructed",
-        "noParkSpaces",
+        "geo_plz",
+        "lift_num",
     ]
 
 
@@ -29,10 +34,9 @@ def build_polynomial_design_matrix(X_full, n_features, degree):
     """
 
     # Extract the first n_features columns
-    X_poly = X_full[:, :n_features]
-
-    # ToDo: This only selects the columns, but is not setting up the design matrix
-
+    X_sub = X_full[:, :n_features]
+    poly = PolynomialFeatures(degree=degree,include_bias=False)
+    X_poly = poly.fit_transform(X_sub)
     return X_poly
 
 # ---------------------------------------------------------------------
@@ -62,8 +66,33 @@ def evaluate_polynomial_models(X_train=None, y_train=None, X_val=None, y_val=Non
             {"features": ["livingSpace"], "degree": 1, "r2_train": ..., "r2_val": ..., "rmse_train": ..., "rmse_val": ...},
             ...
         ]
+        """
+    results = []
+    total_features = len(feature_names)
+    for n_feat in range(1,total_features+1):
+        features_tmp = feature_names[:n_feat]
+        for degree in range(1,max_degree + 1):
+            X_train_mat = build_polynomial_design_matrix(X_train, n_feat, degree)
+            X_val_mat = build_polynomial_design_matrix(X_val, n_feat, degree)
 
-    """
+            model = train_baseline_model(X_train_mat, y_train)
+            train_results = evaluate_model(model, X_train_mat,y_train)
+            val_results = evaluate_model(model, X_val_mat,y_val)
+            results.append({
+                'features': features_tmp,
+                'degree': degree,
+                'r2_train': train_results['r2'],
+                'rmse_train': train_results['rmse'],
+                'r2_val': val_results['r2'],
+                'rmse_val': val_results['rmse']
+            })
+    print(results)
+    return results
+
+
+
+
+""" 
     dummy_results = [
         {"features": ["livingSpace"], "degree": 1, "r2_train": 0.68, "r2_val": 0.63, "rmse_train": 240, "rmse_val": 260},
         {"features": ["livingSpace"], "degree": 2, "r2_train": 0.79, "r2_val": 0.73, "rmse_train": 210, "rmse_val": 220},
@@ -73,7 +102,7 @@ def evaluate_polynomial_models(X_train=None, y_train=None, X_val=None, y_val=Non
         {"features": ["livingSpace"], "degree": 6, "r2_train": 0.96, "r2_val": 0.61, "rmse_train": 125, "rmse_val": 320},
     ]
     print("Dummy polynomial results returned.")
-    return dummy_results
+    return dummy_results """
 
 #---------------------------------------------------------------------
 # Analyze Performance of Polynomial Models (Task 3.1)
@@ -105,6 +134,12 @@ def analyze_polynomial_performance(poly_results):
             ...
         ]
     """
+    summary = []
+    for entry in poly_results:
+        continue
+    
+
+
     # Task 3.1: You have to iterate over the poly_results structure
     # (which comes from evaluate_polynomial_models)
     # group entries by feature combination
