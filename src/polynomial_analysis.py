@@ -86,10 +86,8 @@ def evaluate_polynomial_models(X_train=None, y_train=None, X_val=None, y_val=Non
                 'r2_val': val_results['r2'],
                 'rmse_val': val_results['rmse']
             })
-    print(results)
+
     return results
-
-
 
 
 """ 
@@ -137,7 +135,7 @@ def analyze_polynomial_performance(poly_results):
     summary = []
     for entry in poly_results:
         continue
-    
+
 
 
     # Task 3.1: You have to iterate over the poly_results structure
@@ -176,11 +174,16 @@ def get_best_polynomial_model(results_list):
     Students should later replace this with a real selection from
     the evaluated results (e.g., by highest validation R²).
     """
-    best_model = {
+    """best_model = {
         "degree": 2,
         "features": ["livingSpace", "numberOfRooms"],
         "r2_train": 0.7,
         "r2_val": 0.7,
         "rmse_val": 160,
-    }
+    }"""
+    best_model = results_list[0]
+    for model in results_list:
+        if model["r2_val"] > best_model["r2_val"]:
+            best_model = model
+
     return best_model

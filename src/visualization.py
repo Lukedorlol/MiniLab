@@ -82,6 +82,8 @@ def plot_heatmap_performance(results_list, output_dir="results", metric="r2_val"
     Visualize validation performance as a heatmap over polynomial degree x number of features.
     Works directly from flat list of dicts.
     """
+
+    """
     # Creates a 3×6 heatmap with random values between 0 and 1.
     df_res = pd.DataFrame(results_list)
     df_res['n_features'] = df_res['features'].apply(len)
@@ -101,13 +103,41 @@ def plot_heatmap_performance(results_list, output_dir="results", metric="r2_val"
 
     ax.set_yticks(range(3))
     ax.set_yticklabels([f"Set {i+1}" for i in range(3)])
+    """
+    fig, ax = plt.subplots(figsize=(6, 3))
+    if metric == "r2_val":
+        data = {
+            '1':{'1 Degree': results_list[0]['r2_val'], '2 Degree': results_list[1]['r2_val'], '3 Degree': results_list[2]['r2_val'], '4 Degree': results_list[3]['r2_val'], '5 Degree': results_list[4]['r2_val'], '6 Degree': results_list[5]['r2_val']}, 
+            '2':{'1 Degree': results_list[6]['r2_val'], '2 Degree': results_list[7]['r2_val'], '3 Degree': results_list[8]['r2_val'], '4 Degree': results_list[9]['r2_val'], '5 Degree': results_list[10]['r2_val'], '6 Degree': results_list[11]['r2_val']}, 
+            '3':{'1 Degree': results_list[12]['r2_val'], '2 Degree': results_list[13]['r2_val'], '3 Degree': results_list[14]['r2_val'], '4 Degree': results_list[15]['r2_val'], '5 Degree': results_list[16]['r2_val'], '6 Degree': results_list[17]['r2_val']}, 
+        }
+    else:
+        data = {
+            '1':{'1 Degree': results_list[0]['rmse_val'], '2 Degree': results_list[1]['rmse_val'], '3 Degree': results_list[2]['rmse_val'], '4 Degree': results_list[3]['rmse_val'], '5 Degree': results_list[4]['rmse_val'], '6 Degree': results_list[5]['rmse_val']}, 
+            '2':{'1 Degree': results_list[6]['rmse_val'], '2 Degree': results_list[7]['rmse_val'], '3 Degree': results_list[8]['rmse_val'], '4 Degree': results_list[9]['rmse_val'], '5 Degree': results_list[10]['rmse_val'], '6 Degree': results_list[11]['rmse_val']}, 
+            '3':{'1 Degree': results_list[12]['rmse_val'], '2 Degree': results_list[13]['rmse_val'], '3 Degree': results_list[14]['rmse_val'], '4 Degree': results_list[15]['rmse_val'], '5 Degree': results_list[16]['rmse_val'], '6 Degree': results_list[17]['rmse_val']}, 
+        }
+
+    heatmap_data = pd.DataFrame.from_dict(data, orient='index')
+    print(heatmap_data)
+    im = ax.imshow(heatmap_data, cmap="hot", origin="lower", aspect="auto")
+    
+    # Axis labels
+    ax.set_xlabel("Polynomial degree")
+    ax.set_ylabel("Feature set index")
+
+    ax.set_xticks(range(6))
+    ax.set_xticklabels([1, 2, 3, 4, 5, 6])
+
+    ax.set_yticks(range(3))
+    ax.set_yticklabels([f"Set {i+1}" for i in range(3)])
 
     # Colorbar
     cbar = plt.colorbar(im)
-    cbar.set_label("Dummy R² value")
+    cbar.set_label("R² value")
 
     plt.tight_layout()
-
+	
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, f"{file_name}.pdf")
     plt.savefig(path)
@@ -135,11 +165,8 @@ def plot_polynomial_results(results_list, output_dir="results", file_name="Task_
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    feature_sets = [
-        ["A"],
-        ["A", "B"],
-        ["A", "B", "C"],
-    ]
+    feature_sets = [results_list[0]["features"], results_list[8]["features"], results_list[13]["features"]]
+    print (feature_sets)
 
     created_paths = []
 
@@ -147,13 +174,13 @@ def plot_polynomial_results(results_list, output_dir="results", file_name="Task_
         fig, ax = plt.subplots(figsize=(4, 3))
 
         # Dummy placeholder curve
-        degrees = [1, 2, 3, 4, 5, 6]
-        dummy_train = np.random.rand(len(degrees))
-        dummy_val   = np.random.rand(len(degrees))
+        degrees = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        train = [r2_values["r2_train"] for r2_values in results_list[6 * (len(fs) - 1):6 * len(fs)]]
+        val   = [r2_values["r2_val"] for r2_values in results_list[6 * (len(fs) - 1):6 * len(fs)]]
+        ax.plot(degrees, train, marker="o", label="Train R²", ls="--")
+        ax.plot(degrees, val, marker="o", label="Validate R²")
 
-        ax.plot(degrees, dummy_train, marker="o", label="Train R²")
-
-        ax.set_title("Dummy polynomial curve")
+        ax.set_title("Polynomial curves")
         ax.set_xlabel("Degree")
         ax.set_ylabel("R²")
         ax.grid(True, linestyle=":")

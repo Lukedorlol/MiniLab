@@ -29,6 +29,7 @@ build/
 .env
 .ipynb_checkpoints
 **/.ipynb_checkpoints
+mein_env/
 
 # === Symlinks handling ===
 # Track symbolic links inside OnlineWebsite

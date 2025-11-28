@@ -13,8 +13,22 @@ Run manually via:
 
 import pandas as pd
 import numpy as np
-import os, sys
+import os,sys
+from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# 1. Wo liegt diese Datei gerade? (ordner_a/main.py)
+current_file = Path(__file__).resolve()
+
+# 2. Das Projekt-Verzeichnis ist der "Großvater" dieser Datei
+# .parent = ordner_a
+# .parent.parent = Projekt
+project_root = current_file.parent.parent
+
+# 3. Zum Pfad hinzufügen
+sys.path.append(str(project_root))
+
+print(f"Habe Pfad hinzugefügt: {project_root}") # Zur Kontrolle
 
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, root_mean_squared_error
@@ -40,9 +54,6 @@ def load_clean_data():
         "livingSpace",
         "geo_plz",
         "lift_num",
-        """ "regio3_num",
-        "heatingType_num",
-        "cellar_num", """
     ]
 
     # Filter to only those that still exist
