@@ -38,11 +38,11 @@ def load_clean_data():
     # TODO for students: You have to select the optimal features.
     candidate_features = [
         "livingSpace",
-        "yearConstructed",
-        "noParkSpaces",
-        "picturecount",
-        "noRooms",
-        "totalRent",
+        "geo_plz",
+        "lift_num",
+        """ "regio3_num",
+        "heatingType_num",
+        "cellar_num", """
     ]
 
     # Filter to only those that still exist

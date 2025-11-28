@@ -8,6 +8,7 @@ Creates plots for evaluating models and learning.
 
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------
@@ -42,6 +43,8 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
     n_features = [r["n_features"] for r in results]
     r2_values = [r["r2"] for r in results]
     rmse_values = [r["rmse"] for r in results]
+    r2_train_values = [r['r2_train'] for  r in results]
+    rmse_train_values = [r['rmse_train'] for r in results]
 
     # --- Create figure ---
     fig, ax1 = plt.subplots(figsize=(6, 4))
@@ -52,12 +55,14 @@ def plot_feature_performance(results, output_dir="results", file_name="Task_2"):
     ax1.set_xlabel("Number of features")
     ax1.set_ylabel("R² (val:green, train:blue)", color=color_r2)
     ax1.plot(n_features, r2_values, color_r2)
+    ax1.plot(n_features,r2_train_values, color='tab:green')
     ax1.tick_params(axis="y", labelcolor=color_r2)
     
 
     ax2 = ax1.twinx()
     ax2.set_ylabel("RMSE (€) (val:pink, train:red)", color=color_rmse)
     ax2.plot(n_features, rmse_values, color_rmse)
+    ax2.plot(n_features, rmse_train_values, color='tab:pink')
     ax2.tick_params(axis="y", labelcolor=color_rmse)
 
     plt.title("Model performance (validation) vs. number of features")
@@ -78,7 +83,11 @@ def plot_heatmap_performance(results_list, output_dir="results", metric="r2_val"
     Works directly from flat list of dicts.
     """
     # Creates a 3×6 heatmap with random values between 0 and 1.
-    heatmap_data = np.random.rand(3, 6)
+    df_res = pd.DataFrame(results_list)
+    df_res['n_features'] = df_res['features'].apply(len)
+    heatmap_df = df_res.pivot(index= 'n_features', columns= 'degree', values='r2_val')
+    heatmap_data = heatmap_df.to_numpy()
+    print(heatmap_data)
 
     fig, ax = plt.subplots(figsize=(6, 3))
     im = ax.imshow(heatmap_data, cmap="viridis", origin="lower", aspect="auto")
