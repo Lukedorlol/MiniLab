@@ -8,6 +8,7 @@ Creates plots for evaluating models and learning.
 
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------
@@ -82,7 +83,11 @@ def plot_heatmap_performance(results_list, output_dir="results", metric="r2_val"
     Works directly from flat list of dicts.
     """
     # Creates a 3×6 heatmap with random values between 0 and 1.
-    heatmap_data = np.random.rand(3, 6)
+    df_res = pd.DataFrame(results_list)
+    df_res['n_features'] = df_res['features'].apply(len)
+    heatmap_df = df_res.pivot(index= 'n_features', columns= 'degree', values='r2_val')
+    heatmap_data = heatmap_df.to_numpy()
+    print(heatmap_data)
 
     fig, ax = plt.subplots(figsize=(6, 3))
     im = ax.imshow(heatmap_data, cmap="viridis", origin="lower", aspect="auto")
