@@ -82,7 +82,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     if "livingSpace" in df_clean.columns:
         df_clean = df_clean[(df_clean["livingSpace"] > 10) & (df_clean['livingSpace'] < 1000)]
     if 'geo_plz' in df_clean.columns:
-        df_clean = df_clean[(df_clean['geo_plz'] < 48200)]
+        df_clean = df_clean[(df_clean['geo_plz'] < 48470)]
     # Fill serviceCharge with Median
     df_clean['serviceCharge'] = df['serviceCharge'].fillna(df_clean['serviceCharge'].median())
 
@@ -110,11 +110,13 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Keep only numeric columns
     df_clean = df_clean.select_dtypes(include=[np.number])
     #Remove Columns with to many NaNs
-    df_clean.drop(['telekomHybridUploadSpeed', 'heatingCosts', 'electricityBasePrice', 'electricityKwhPrice'], axis = 1, inplace = True)
+    df_clean.drop(['telekomHybridUploadSpeed', 'picturecount','heatingCosts', 'electricityBasePrice', 'electricityKwhPrice','scoutId'], axis = 1, inplace = True)
 
     # Final safety check
     df_clean = df_clean.dropna(axis=0, how="any")
     print("Dataframe cleaned, Shape: ", df_clean.shape)
+    for col in df_clean.columns:
+        print(col)
     return df_clean
 
 # ---------------------------------------------------------------------
