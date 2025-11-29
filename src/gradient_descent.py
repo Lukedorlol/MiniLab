@@ -61,11 +61,21 @@ class GradientDescentLinearModel:
             - Compute gradients for w and b
             - Update parameters using the learning rate
         """
-
         # Currently does nothing except compute a dummy RMSE
         pred = self._predict_raw(Xs)
-        rmse = 0.
+        error = pred - ys
+        # Mean for through all the Data
+        m = Xs.shape[0]
+        gradient = (1/m) * (Xs.T @ error)
+        # Updates Weights
+        self.w = self.w - self.learning_rate * gradient
+        # Updates Bias
+        #self.b = (1 / m) * np.sum(error)
+
+
+        rmse = float(np.sqrt(np.mean((pred - ys)**2)))
         # (Currently no update -> w and b never change)
+        print(gradient)
         return rmse
 
     # --------------------------------------------------
@@ -202,6 +212,8 @@ class GradientDescentLinearModel:
             "r2_train": float(r2_score(y_train, y_pred_train)),
             "rmse_train": float(root_mean_squared_error(y_train, y_pred_train))
         }
+
+        print(result)
 
         if X_val is not None:
             y_pred_val = self.predict(X_val)
