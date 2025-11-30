@@ -115,8 +115,6 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Final safety check
     df_clean = df_clean.dropna(axis=0, how="any")
     print("Dataframe cleaned, Shape: ", df_clean.shape)
-    for col in df_clean.columns:
-        print(col)
     return df_clean
 
 # ---------------------------------------------------------------------
