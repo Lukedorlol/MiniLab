@@ -66,16 +66,18 @@ class GradientDescentLinearModel:
         error = pred - ys
         # Mean for through all the Data
         m = Xs.shape[0]
-        gradient = (1/m) * (Xs.T @ error)
+        gradientW = (1/m) * np.sum(Xs.T @ error)
         # Updates Weights
-        self.w = self.w - self.learning_rate * gradient
+        self.w = self.w - self.learning_rate * gradientW
         # Updates Bias
-        #self.b = (1 / m) * np.sum(error)
+        gradientB = (1/m) * np.sum(error)
+        self.b = self.b - self.learning_rate * gradientB
 
 
-        rmse = float(np.sqrt(np.mean((pred - ys)**2)))
+        rmse = float(root_mean_squared_error(ys, pred)) # float(np.sqrt(np.mean((pred - ys)**2)))
+        r2 = float(r2_score(ys, pred))
+
         # (Currently no update -> w and b never change)
-        print(gradient)
         return rmse
 
     # --------------------------------------------------
@@ -115,7 +117,9 @@ class GradientDescentLinearModel:
                 val_pred = self._predict_raw(Xs_val)
                 val_rmse = float(np.sqrt(np.mean((val_pred - ys_val)**2)))
                 self.val_curve.append(val_rmse)
-
+        pred = self._predict_raw(Xs)
+        r2 = float(r2_score(ys, pred))
+        print(r2)
         return self
 
     # --------------------------------------------------
@@ -213,7 +217,6 @@ class GradientDescentLinearModel:
             "rmse_train": float(root_mean_squared_error(y_train, y_pred_train))
         }
 
-        print(result)
 
         if X_val is not None:
             y_pred_val = self.predict(X_val)
